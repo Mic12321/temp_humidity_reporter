@@ -35,7 +35,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(temp_humidity_reporter temp_humidity_reporter.cpp )
+add_executable(temp_humidity_reporter temp_humidity_reporter.cpp DHT22.cpp )
 
 pico_set_program_name(temp_humidity_reporter "temp_humidity_reporter")
 pico_set_program_version(temp_humidity_reporter "0.1")
