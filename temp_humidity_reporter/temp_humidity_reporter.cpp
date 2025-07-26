@@ -2,7 +2,8 @@
 #include "pico/stdlib.h"
 #include "pico/cyw43_arch.h"
 #include "config.h"
-#include "DHT22.h"
+#include "dht22.h"
+#include "mqtt.h"
 
 #define DHT_PIN 15
 

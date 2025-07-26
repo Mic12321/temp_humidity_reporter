@@ -1,6 +1,6 @@
 #include "pico/stdlib.h"
 #include <stdio.h>
-#include "DHT22.h"
+#include "dht22.h"
 
 void dht22_init(uint gpio_pin) {
     gpio_init(gpio_pin);
