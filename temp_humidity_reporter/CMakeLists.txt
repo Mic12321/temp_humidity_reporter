@@ -35,7 +35,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(temp_humidity_reporter temp_humidity_reporter.cpp dht22.cpp mqtt.cpp)
+add_executable(temp_humidity_reporter temp_humidity_reporter.cpp dht22.cpp mqttwrapper.cpp)
 
 pico_set_program_name(temp_humidity_reporter "temp_humidity_reporter")
 pico_set_program_version(temp_humidity_reporter "0.1")
@@ -45,19 +45,21 @@ pico_enable_stdio_uart(temp_humidity_reporter 0)
 pico_enable_stdio_usb(temp_humidity_reporter 1)
 
 # Add the standard library to the build
-target_link_libraries(temp_humidity_reporter
-        pico_stdlib)
+target_link_libraries(
+    temp_humidity_reporter
+    pico_stdlib
+    pico_cyw43_arch_lwip_threadsafe_background
+    pico_lwip_mqtt
+    pico_lwip_api
+    pico_lwip_arch
+)
 
 # Add the standard include files to the build
 target_include_directories(temp_humidity_reporter PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}
+  ${PICO_SDK_PATH}/lib/lwip/src/include
+  ${PICO_SDK_PATH}/lib/lwip/contrib/apps/mqtt
 )
-
-# Add any user requested libraries
-target_link_libraries(temp_humidity_reporter 
-        pico_cyw43_arch_lwip_threadsafe_background
-        # pico_cyw43_arch_none
-        )
 
 pico_add_extra_outputs(temp_humidity_reporter)
 

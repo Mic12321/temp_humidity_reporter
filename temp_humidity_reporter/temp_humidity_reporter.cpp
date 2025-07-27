@@ -3,7 +3,7 @@
 #include "pico/cyw43_arch.h"
 #include "config.h"
 #include "dht22.h"
-#include "mqtt.h"
+#include "mqttwrapper.h"
 
 #define DHT_PIN 15
 
@@ -29,14 +29,28 @@ bool connect_wifi() {
 
 int main() {
     stdio_init_all();
-    sleep_ms(2000);  // Let USB serial settle
+    sleep_ms(10000);  // Let USB serial settle
 
     if (cyw43_arch_init()) {
         printf("Wi-Fi initialization failed!\n");
         return -1;
     }
 
+
+    MqttWrapper mqtt;
+    bool connecting = false;
+
+    if (!mqtt.init()) {
+        printf("Failed to initialize MQTT client\n");
+        return -1;
+    }
+    else {
+        printf("MQTT client initialized successfully\n");
+    }
+    
+
     dht22_init(DHT_PIN);  // Initialize DHT22 GPIO
+
 
     float temp = 0.0f, hum = 0.0f;
 
@@ -44,11 +58,6 @@ int main() {
         printf("Initial Wi-Fi connection failed. Retrying in 10 seconds...\n");
         sleep_ms(10000);
     }
-
-    gpio_set_dir(DHT_PIN, GPIO_OUT);
-    gpio_put(DHT_PIN, 0);
-    sleep_ms(500);
-    gpio_put(DHT_PIN, 1);
 
     while (true) {
         // Check Wi-Fi connection
@@ -66,6 +75,26 @@ int main() {
         } else {
             printf("Failed to read from DHT22\n");
         }
+
+        if (mqtt.isConnected()) {
+            connecting = false;  // Reset flag on successful connection
+            if (!mqtt.publish("test/topic", "Hello from lwIP MQTT")) {
+                printf("Failed to publish message\n");
+            } else {
+                printf("Message published successfully\n");
+            }
+        } else {
+            if (!connecting) {
+                printf("MQTT not connected, attempting to connect...\n");
+                mqtt.connect(BROKER_IP, BROKER_PORT);
+                connecting = true;  // Mark that we started connecting
+            } else {
+                printf("MQTT is connecting, please wait...\n");
+            }
+        }
+
+
+
 
         printf("Sleeping for 5s...\n");
         sleep_ms(5000);

@@ -4,6 +4,8 @@
 // Common settings used in most of the pico_w examples
 // (see https://www.nongnu.org/lwip/2_1_x/group__lwip__opts.html for details)
 
+#undef MEMP_NUM_SYS_TIMEOUT
+#define MEMP_NUM_SYS_TIMEOUT  (LWIP_NUM_SYS_TIMEOUT_INTERNAL + 1)
 // allow override in some examples
 #ifndef NO_SYS
 #define NO_SYS                      1
