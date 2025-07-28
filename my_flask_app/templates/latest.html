@@ -1,0 +1,17 @@
+{% extends "base.html" %} {% block content %}
+<h1>Current Sensor Data</h1>
+<p>Next update in <span id="countdown">5</span> seconds</p>
+
+{% if data %}
+<p>
+  <strong>Temperature:</strong> <span id="temp">{{ data.temperature }}</span> °C
+</p>
+<p><strong>Humidity:</strong> <span id="hum">{{ data.humidity }}</span> %</p>
+<p>
+  <em>Updated at: <span id="time">{{ data.timestamp }}</span></em>
+</p>
+{% else %}
+<p>No data available.</p>
+{% endif %} {% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/live_update.js') }}"></script>
+{% endblock %}
