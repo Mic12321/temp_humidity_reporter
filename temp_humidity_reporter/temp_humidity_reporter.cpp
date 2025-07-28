@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <iomanip>
 #include "pico/stdlib.h"
 #include "pico/cyw43_arch.h"
 #include "config.h"
@@ -53,6 +54,7 @@ int main() {
 
 
     float temp = 0.0f, hum = 0.0f;
+    std::string message="Hello from lwIP MQTT";
 
     if (!connect_wifi()) {
         printf("Initial Wi-Fi connection failed. Retrying in 10 seconds...\n");
@@ -71,14 +73,22 @@ int main() {
 
         // Read DHT22
         if (read_dht22(DHT_PIN, &temp, &hum)) {
+            std::ostringstream oss;
+            oss << std::fixed << std::setprecision(1);
+            oss << "{";
+            oss << "\"temperature\": " << temp << ", ";
+            oss << "\"humidity\": " << hum;
+            oss << "}";
+            message = oss.str();
             printf("Temperature: %.1f °C  Humidity: %.1f %%\n", temp, hum);
         } else {
+            message = "Failed to read DHT22";
             printf("Failed to read from DHT22\n");
         }
 
         if (mqtt.isConnected()) {
             connecting = false;  // Reset flag on successful connection
-            if (!mqtt.publish("test/topic", "Hello from lwIP MQTT")) {
+            if (!mqtt.publish("test/topic", message)) {
                 printf("Failed to publish message\n");
             } else {
                 printf("Message published successfully\n");
