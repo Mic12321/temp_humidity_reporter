@@ -3,9 +3,17 @@ from flask_socketio import SocketIO
 from models import db, SensorData
 import paho.mqtt.client as mqtt
 import json
+import os
+from dotenv import load_dotenv
+
+
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mqtt_data.db'
+load_dotenv()
+mqtt_broker = os.getenv("MQTT_BROKER")
+mqtt_port = int(os.getenv("MQTT_PORT", 1883))
+mqtt_topic = os.getenv("MQTT_TOPIC", "test/topic")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -33,7 +41,7 @@ def graphs():
 # MQTT Callbacks
 def on_connect(client, userdata, flags, rc):
     print("Connected to MQTT broker")
-    client.subscribe("test/topic")
+    client.subscribe(mqtt_topic)
     
 def on_message(client, userdata, msg):
     try:
@@ -56,7 +64,7 @@ def on_message(client, userdata, msg):
 
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
-mqtt_client.connect("192.168.7.80", 18830, 60)
+mqtt_client.connect(mqtt_broker, mqtt_port, 60)
 mqtt_client.loop_start()
 
 if __name__ == '__main__':
