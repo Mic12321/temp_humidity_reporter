@@ -46,6 +46,15 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     try:
         payload = json.loads(msg.payload.decode())
+        
+
+        if "error" in payload:
+            error_msg = payload["error"]
+            print(f"Sensor error: {error_msg}")
+            socketio.emit('mqtt_error', {'error': error_msg})
+            return
+
+        # Proceed normally if no error
         temp = float(payload.get("temperature"))
         hum = float(payload.get("humidity"))
 
@@ -61,6 +70,7 @@ def on_message(client, userdata, msg):
     except Exception as e:
         print("Error processing MQTT message:", e)
         print("Payload:", msg.payload.decode())
+
 
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message

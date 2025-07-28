@@ -82,7 +82,7 @@ int main() {
             message = oss.str();
             printf("Temperature: %.1f °C  Humidity: %.1f %%\n", temp, hum);
         } else {
-            message = "{\"error\": \"Can't read from DHT22\"}";
+            message = "{\"error\": \"Failed to read from DHT22\"}";
             printf("Failed to read from DHT22\n");
         }
 
