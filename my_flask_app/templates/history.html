@@ -1,4 +1,26 @@
 {% extends "base.html" %} {% block content %}
-<h1>History</h1>
-<p>Coming soon: List of past sensor readings.</p>
+<h1>Sensor Data History (last 100 records)</h1>
+
+<table border="1" cellpadding="5" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Timestamp</th>
+      <th>Temperature (°C)</th>
+      <th>Humidity (%)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in data %}
+    <tr>
+      <td>{{ d.timestamp }}</td>
+      <td>{{ '%.1f' | format(d.temperature) }}</td>
+      <td>{{ '%.1f' | format(d.humidity) }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="3">No data available.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}

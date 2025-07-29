@@ -6,7 +6,7 @@ const errorBox = document.getElementById("error-message");
 
 let lastValidTime = timeEl.dataset.initial || null;
 let errorSinceTime = null;
-let countdown = 5;
+let countdown = 60;
 
 if (lastValidTime) {
   timeEl.textContent = `Last updated: ${lastValidTime}`;
@@ -29,7 +29,7 @@ socket.on("mqtt_message", function (msg) {
   lastValidTime = now.toLocaleString();
   timeEl.textContent = `Last updated: ${lastValidTime}`;
 
-  countdown = 5;
+  countdown = 60;
   countdownEl.textContent = countdown;
 
   errorBox.style.display = "none";
@@ -51,6 +51,6 @@ socket.on("mqtt_error", function (msg) {
   errorBox.textContent = msg.error;
   errorBox.style.display = "block";
 
-  countdown = 5;
+  countdown = 60;
   countdownEl.textContent = countdown;
 });

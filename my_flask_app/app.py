@@ -1,10 +1,11 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO
 from models import db, SensorData
 import paho.mqtt.client as mqtt
 import json
 import os
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
 
 
 
@@ -30,13 +31,39 @@ def latest():
 
 @app.route('/history')
 def history():
-    # For now just a placeholder page
-    return render_template('history.html')
+    data = SensorData.query.order_by(SensorData.timestamp.desc()).limit(100).all()
+    return render_template('history.html', data=data)
 
 @app.route('/graphs')
 def graphs():
-    # Placeholder page for graphs or future features
     return render_template('graphs.html')
+
+@app.route('/api/history')
+def api_history():
+    time_range = request.args.get('range', 'day')
+    now = datetime.utcnow()
+
+    if time_range == 'year':
+        start_time = now - timedelta(days=365)
+    elif time_range == 'week':
+        start_time = now - timedelta(weeks=1)
+    elif time_range == 'day':
+        start_time = now - timedelta(days=1)
+    elif time_range == 'hour':
+        start_time = now - timedelta(hours=1)
+    else:
+        return jsonify({"error": "Invalid range"}), 400
+
+    data = SensorData.query.filter(SensorData.timestamp >= start_time).order_by(SensorData.timestamp.asc()).all()
+
+    result = [{
+        "timestamp": d.timestamp.isoformat(),
+        "temperature": d.temperature,
+        "humidity": d.humidity
+    } for d in data]
+
+    return jsonify(result)
+
 
 # MQTT Callbacks
 def on_connect(client, userdata, flags, rc):
