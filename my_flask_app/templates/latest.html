@@ -1,19 +1,31 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+
+{% block content %}
 <h1>Current Sensor Data</h1>
 <p>Updating in <span id="countdown">60</span> seconds</p>
 <div id="error-message" style="color: red; display: none"></div>
-{% if data %}
-<p>
-  <strong>Temperature:</strong> <span id="temp">{{ data.temperature }}</span> °C
-</p>
-<p><strong>Humidity:</strong> <span id="hum">{{ data.humidity }}</span> %</p>
-<p>
-  <p><em><span id="time" data-initial="{{ data.timestamp }}">Last updated: {{ data.timestamp }}</span></em></p>
-</p>
 
-<div id="error-message" style="color: red; display: none"></div>
-{% else %}
-<p>No data available.</p>
-{% endif %} {% endblock %} {% block scripts %}
+<p>
+  <strong>Temperature:</strong>
+  <span id="temp">{{ data.temperature if data else "—" }}</span> °C
+</p>
+<p>
+  <strong>Humidity:</strong>
+  <span id="hum">{{ data.humidity if data else "—" }}</span> %
+</p>
+<p>
+  <em>
+    {% if data %}
+    <span id="time" data-initial="{{ data.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ') }}">
+      Last updated: {{ data.timestamp.strftime('%d/%m/%Y, %H:%M:%S') }}
+    </span>
+    {% else %}
+    <span id="time">Waiting for data...</span>
+    {% endif %}
+  </em>
+</p>
+{% endblock %}
+
+{% block scripts %}
 <script src="{{ url_for('static', filename='js/live_update.js') }}"></script>
 {% endblock %}
