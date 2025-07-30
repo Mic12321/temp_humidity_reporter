@@ -5,7 +5,7 @@ import paho.mqtt.client as mqtt
 import json
 import os
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 
@@ -14,15 +14,21 @@ load_dotenv()
 mqtt_broker = os.getenv("MQTT_BROKER")
 mqtt_port = int(os.getenv("MQTT_PORT", 1883))
 mqtt_topic = os.getenv("MQTT_TOPIC", "test/topic")
+env = os.getenv("FLASK_ENV", "production")
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+client_id = "python-mqtt-1"
 
 db.init_app(app)
+
+with app.app_context():
+    print("Creating database tables...")
+    db.create_all()
 
 socketio = SocketIO(app)
 
 # MQTT Setup
-mqtt_client = mqtt.Client()
+mqtt_client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2)
 
 @app.route('/')
 def latest():
@@ -41,7 +47,7 @@ def graphs():
 @app.route('/api/history')
 def api_history():
     time_range = request.args.get('range', 'day')
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     if time_range == 'year':
         start_time = now - timedelta(days=365)
@@ -66,7 +72,7 @@ def api_history():
 
 
 # MQTT Callbacks
-def on_connect(client, userdata, flags, rc):
+def on_connect(client, userdata, flags, reason_code, properties):
     print("Connected to MQTT broker")
     client.subscribe(mqtt_topic)
     
@@ -105,6 +111,6 @@ mqtt_client.connect(mqtt_broker, mqtt_port, 60)
 mqtt_client.loop_start()
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    socketio.run(app, debug=True)
+    print("Starting Flask app...")
+
+    socketio.run(app, debug=(env == "development"))
