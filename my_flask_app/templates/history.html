@@ -1,4 +1,6 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+
+{% block content %}
 <h1>Sensor Data History (last 100 records)</h1>
 
 <table border="1" cellpadding="5" cellspacing="0">
@@ -12,7 +14,9 @@
   <tbody>
     {% for d in data %}
     <tr>
-      <td>{{ d.timestamp }}</td>
+      <td class="timestamp" data-initial="{{ d.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ') }}">
+        {{ d.timestamp.strftime('%d/%m/%Y, %H:%M:%S') }}
+      </td>
       <td>{{ '%.1f' | format(d.temperature) }}</td>
       <td>{{ '%.1f' | format(d.humidity) }}</td>
     </tr>
@@ -23,4 +27,8 @@
     {% endfor %}
   </tbody>
 </table>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/history_page.js') }}"></script>
 {% endblock %}
