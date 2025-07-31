@@ -1,139 +1,33 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+
+{% block content %}
 <h1>Sensor Data Graphs</h1>
 <h3 id="chartTitle">Loading...</h3>
 
 <div class="mb-3">
-  <button id="btn-year" onclick="fetchAndPlot('year')">Year</button>
-  <button id="btn-week" onclick="fetchAndPlot('week')">Week</button>
-  <button id="btn-day" onclick="fetchAndPlot('day')">Day</button>
-  <button id="btn-hour" onclick="fetchAndPlot('hour')">Hour</button>
+  <button id="btn-year">Year</button>
+  <button id="btn-week">Week</button>
+  <button id="btn-day">Day</button>
+  <button id="btn-hour">Hour</button>
 </div>
 
-<style>
-  .active-range {
-    background-color: #007bff;
-    color: white;
-    font-weight: bold;
-  }
-</style>
-
 <canvas id="historyChart" width="900" height="400"></canvas>
-{% endblock %} {% block scripts %}
+{% endblock %}
+
+{% block scripts %}
 <!-- Chart.js & adapters -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.0/dist/chartjs-adapter-luxon.umd.min.js"></script>
 
-<script>
-  let chart;
-
-  function setActiveButton(range) {
-    const buttons = ["year", "week", "day", "hour"];
-    buttons.forEach((r) => {
-      const btn = document.getElementById(`btn-${r}`);
-      if (btn) btn.classList.remove("active-range");
-    });
-    const activeBtn = document.getElementById(`btn-${range}`);
-    if (activeBtn) activeBtn.classList.add("active-range");
-  }
-
-  function fetchAndPlot(range) {
-    setActiveButton(range);
-
-    fetch(`/api/history?range=${range}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!Array.isArray(data)) {
-          alert(data.error || "Invalid data received");
-          return;
-        }
-
-        const labels = data.map((d) => d.timestamp);
-        const temps = data.map((d) => d.temperature);
-        const hums = data.map((d) => d.humidity);
-
-        if (chart) chart.destroy();
-
-        document.getElementById("chartTitle").textContent =
-          {
-            year: "Sensor History – Last 12 Months",
-            week: "Sensor History – Last 7 Days",
-            day: "Sensor History – Last 24 Hours",
-            hour: "Sensor History – Last Hour",
-          }[range] || "Sensor History";
-
-        chart = new Chart(document.getElementById("historyChart"), {
-          type: "line",
-          data: {
-            labels: labels,
-            datasets: [
-              {
-                label: "Temperature (°C)",
-                data: temps,
-                borderColor: "red",
-                backgroundColor: "rgba(255, 99, 132, 0.2)",
-                yAxisID: "y",
-              },
-              {
-                label: "Humidity (%)",
-                data: hums,
-                borderColor: "blue",
-                backgroundColor: "rgba(54, 162, 235, 0.2)",
-                yAxisID: "y1",
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            scales: {
-              x: {
-                type: "time",
-                time: {
-                  tooltipFormat: "MMM d HH:mm",
-                  unit:
-                    range === "year"
-                      ? "month"
-                      : range === "week"
-                      ? "day"
-                      : range === "day"
-                      ? "hour"
-                      : "minute",
-                },
-                title: {
-                  display: true,
-                  text: "Timestamp",
-                },
-              },
-              y: {
-                type: "linear",
-                position: "left",
-                title: {
-                  display: true,
-                  text: "Temperature (°C)",
-                },
-              },
-              y1: {
-                type: "linear",
-                position: "right",
-                grid: {
-                  drawOnChartArea: false,
-                },
-                title: {
-                  display: true,
-                  text: "Humidity (%)",
-                },
-              },
-            },
-          },
-        });
-      })
-      .catch((err) => {
-        console.error(err);
-        alert("Failed to load data.");
-      });
-  }
-
-  // Auto-load default graph
-  fetchAndPlot("day");
-</script>
+<!-- Our JS module -->
+<script type="module" src="{{ url_for('static', filename='js/graph_page.js') }}"></script>
 {% endblock %}
+
+
+<style>
+.active-range {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+}</style>
